@@ -160,14 +160,18 @@ class Run(NamedTuple):
 # FIXME: Implement checkpoint during the optimization
 class BaseOptimization(ABC):
     def __init__(self,
-                 template: Sequence[Template],
-                 search_space: Sequence[Dict[str, Any]],
+                 templates: Sequence[Template],
+                 search_spaces: Sequence[Dict[str, Any]],
                  minimize: bool = True,
                  checkpoint_dir: str = 'checkpoints',
                  min_checkpoint_interval: int = 10,
                  checkpoint_on_exit: bool = True) -> None:
-        self._template = template
-        self._search_space = search_space
+        if len(templates) != len(search_spaces):
+            raise RuntimeError(
+                'templates and search_spaces must have the same len')
+
+        self._template = templates
+        self._search_space = search_spaces
         self._minimize = minimize
 
         self.checkpoint_dir = checkpoint_dir
@@ -265,8 +269,12 @@ class GridSearch(BaseOptimization):
     def __init__(self,
                  template: Sequence[Template],
                  search_space: Sequence[Dict[str, Any]],
-                 minimize: bool = True) -> None:
-        super().__init__(template, search_space, minimize)
+                 minimize: bool = True,
+                 checkpoint_dir: str = 'checkpoints',
+                 min_checkpoint_interval: int = 10,
+                 checkpoint_on_exit: bool = True) -> None:
+        super().__init__(template, search_space, minimize, checkpoint_dir,
+                         min_checkpoint_interval, checkpoint_on_exit)
 
     def samples(self,
                 search_space: Dict[str, Any]) -> Iterator[Dict[str, Any]]:
@@ -280,9 +288,13 @@ class RandomSearch(BaseOptimization):
                  n_iter: int,
                  template: Sequence[Template],
                  search_space: Sequence[Dict[str, Any]],
-                 minimize: bool = True) -> None:
+                 minimize: bool = True,
+                 checkpoint_dir: str = 'checkpoints',
+                 min_checkpoint_interval: int = 10,
+                 checkpoint_on_exit: bool = True) -> None:
         search_space = [to_generator(s) for s in search_space]
-        super().__init__(template, search_space, minimize)
+        super().__init__(template, search_space, minimize, checkpoint_dir,
+                         min_checkpoint_interval, checkpoint_on_exit)
         self.n_iter = n_iter
 
     def samples(self,
