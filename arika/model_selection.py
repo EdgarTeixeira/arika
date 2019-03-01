@@ -140,7 +140,7 @@ class KerasTemplate(Template):
 
     def evaluate_model(self, model, x_val, y_val):
         if self._evaluate_func is None:
-            if len(model.metrics_names) != 1:
+            if len(model.metrics_names) == 1:
                 raise RuntimeError(
                     'The compiled keras model does not computes any metrics.')
             return model.evaluate(x_val, y_val, verbose=0)[1]
