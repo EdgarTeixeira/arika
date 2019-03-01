@@ -1,25 +1,22 @@
 import math
 from typing import Callable
 
-from scipy import stats
+from numpy import random
 
 
-def uniform_float(min: float, max: float) -> Callable[[], float]:
+def uniform_float(min_: float, max_: float) -> Callable[[], float]:
     def sampler():
-        return stats.uniform(min, max).rvs()
-
+        return random.uniform(min_, max_)
     return sampler
 
 
-def loguniform_float(min: float, max: float) -> Callable[[], float]:
+def loguniform_float(min_: float, max_: float) -> Callable[[], float]:
     def sampler():
-        return math.exp(stats.uniform(math.log(min), math.log(max)).rvs())
-
+        return math.exp(random.uniform(math.log(min_), math.log(max_)))
     return sampler
 
 
-def uniform_int(min: int, max: int) -> Callable[[], int]:
+def uniform_int(min_: int, max_: int) -> Callable[[], int]:
     def sampler():
-        return stats.randint(min, max).rvs()
-
+        return random.randint(min_, max_)
     return sampler

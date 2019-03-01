@@ -158,6 +158,7 @@ class Run(NamedTuple):
 
 
 # FIXME: Implement checkpoint during the optimization
+# FIXME: Raise error only if checkpoint dir is not empty
 class BaseOptimization(ABC):
     def __init__(self,
                  templates: Sequence[Template],
