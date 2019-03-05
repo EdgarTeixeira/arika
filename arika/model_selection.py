@@ -158,7 +158,8 @@ class Run(NamedTuple):
 
 
 # FIXME: Implement checkpoint during the optimization
-# FIXME: Raise error only if checkpoint dir is not empty
+# FIXME: Implement distributed training
+# FIXME: Allow the same checkpoint dir to be used multiple times.
 class BaseOptimization(ABC):
     def __init__(self,
                  templates: Sequence[Template],
@@ -178,9 +179,9 @@ class BaseOptimization(ABC):
         self.checkpoint_dir = checkpoint_dir
         if not os.path.exists(self.checkpoint_dir):
             os.mkdir(self.checkpoint_dir)
-        else:
+        elif len(os.listdir(self.checkpoint_dir)) != 0:
             raise RuntimeError(
-                f'{checkpoint_dir} already exists and is not a directory')
+                f'{checkpoint_dir} already exists and is not empty or is not a directory')
 
         self.min_checkpoint_interval = min_checkpoint_interval * 60  # seconds
         self.checkpoint_on_exit = checkpoint_on_exit
