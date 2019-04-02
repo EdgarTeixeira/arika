@@ -8,7 +8,7 @@ def binary_focal_loss(gamma=2.0):
         p_t = y_true * y_pred + (1 - y_true) * (1 - y_pred)
         correction = tf.pow(1 - p_t, gamma)
         p_t = tf.clip_by_value(p_t, _EPSILON, 1.0 - _EPSILON)
-        return -tf.reduce_mean(correction * tf.log(p_t))
+        return -tf.reduce_mean(correction * tf.log(p_t))  # Remove reduce_mean to allow class_weights
 
     return _focal_loss
 
