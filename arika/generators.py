@@ -1,10 +1,11 @@
 import math
 
 import numpy as np
-from tensorflow import keras
+from tensorflow.keras.utils import Sequence
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
-class SparseSequence(keras.utils.Sequence):
+class SparseSequence(Sequence):
     def __init__(self, sparse_x, y, batch_size=32, shuffle=True):
         self.x = sparse_x
         self.y = y
@@ -30,5 +31,19 @@ class SparseSequence(keras.utils.Sequence):
             self.y = self.y[idx]
 
 
-class VariableLengthSequence(keras.utils.Sequence):
-    pass
+class VariableLengthTextSequence(Sequence):
+    def __init__(self, x, y, batch_size=32):
+        self.x = x
+        self.y = y
+        self.batch_size = batch_size
+
+    def __len__(self):
+        return math.ceil(len(self.x) / self.batch_size)
+
+    def __getitem__(self, idx):
+        batch_x = self.x[idx * self.batch_size:(idx + 1) * self.batch_size]
+        batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
+
+        batch_x = pad_sequences(batch_x, value=0)
+
+        return batch_x, batch_y
