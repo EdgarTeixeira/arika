@@ -6,6 +6,7 @@ import random
 import time
 from abc import ABC, abstractmethod
 from collections import abc
+from datetime import datetime
 from typing import (Any, Callable, Dict, Iterator, List, NamedTuple, Sequence,
                     Union)
 
@@ -112,7 +113,8 @@ class KerasTemplate(Template):
                  callbacks=None,
                  shuffle=True,
                  class_weight=None,
-                 sample_weight=None) -> None:
+                 sample_weight=None,
+                 verbose=0) -> None:
         super().__init__('keras')
         self._build_func = build_func
         self._evaluate_func = evaluate_func
@@ -122,6 +124,7 @@ class KerasTemplate(Template):
         self._shuffle = shuffle
         self._class_weight = class_weight
         self._sample_weight = sample_weight
+        self._verbose = verbose
 
     def build_model(self, hyper_parameters):
         return self._build_func(**hyper_parameters)
@@ -130,7 +133,7 @@ class KerasTemplate(Template):
         return model.fit(
             x_train,
             y_train,
-            verbose=0,
+            verbose=self._verbose,
             batch_size=self._batch_size,
             epochs=self._epochs,
             callbacks=self._callbacks,
@@ -159,7 +162,6 @@ class Run(NamedTuple):
 
 # FIXME: Implement checkpoint during the optimization
 # FIXME: Implement distributed training
-# FIXME: Allow the same checkpoint dir to be used multiple times.
 class BaseOptimization(ABC):
     def __init__(self,
                  templates: Sequence[Template],
@@ -176,12 +178,14 @@ class BaseOptimization(ABC):
         self._search_space = search_spaces
         self._minimize = minimize
 
+        # Create the checkpoint directory
         self.checkpoint_dir = checkpoint_dir
         if not os.path.exists(self.checkpoint_dir):
             os.mkdir(self.checkpoint_dir)
-        elif len(os.listdir(self.checkpoint_dir)) != 0:
-            raise RuntimeError(
-                f'{checkpoint_dir} already exists and is not empty or is not a directory')
+
+        current_time = datetime.now().strftime('%Y_%m_%d %H_%M_%S')
+        self.checkpoint_dir = os.path.join(self.checkpoint_dir, current_time)
+        os.mkdir(self.checkpoint_dir)
 
         self.min_checkpoint_interval = min_checkpoint_interval * 60  # seconds
         self.checkpoint_on_exit = checkpoint_on_exit
