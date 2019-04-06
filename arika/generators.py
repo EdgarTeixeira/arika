@@ -82,8 +82,14 @@ class VariableLengthTextSequence(Sequence):
 
     def __getitem__(self, idx):
         batch_x = self.x[idx * self.batch_size:(idx + 1) * self.batch_size]
-        batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
-
         batch_x = pad_sequences(batch_x, value=self.pad_value)
+
+        if isinstance(self.y, list):
+            batch_y = [
+                y[idx * self.batch_size:(idx + 1) * self.batch_size]
+                for y in self.y
+            ]
+        else:
+            batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
 
         return batch_x, batch_y
