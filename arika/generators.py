@@ -59,7 +59,7 @@ class VariableLengthTextSequence(Sequence):
     that batch.
     """
 
-    def __init__(self, x, y, batch_size=32, pad_value=0):
+    def __init__(self, x, y=None, batch_size=32, pad_value=0):
         """
         Paramters
         ---------
@@ -84,12 +84,14 @@ class VariableLengthTextSequence(Sequence):
         batch_x = self.x[idx * self.batch_size:(idx + 1) * self.batch_size]
         batch_x = pad_sequences(batch_x, value=self.pad_value)
 
-        if isinstance(self.y, list):
-            batch_y = [
-                y[idx * self.batch_size:(idx + 1) * self.batch_size]
-                for y in self.y
-            ]
-        else:
-            batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
-
-        return batch_x, batch_y
+        if self.y is not None:
+            if isinstance(self.y, list):
+                batch_y = [
+                    y[idx * self.batch_size:(idx + 1) * self.batch_size]
+                    for y in self.y
+                ]
+            else:
+                batch_y = self.y[idx * self.batch_size:(idx + 1) *
+                                 self.batch_size]
+            return batch_x, batch_y
+        return batch_x
